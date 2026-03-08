@@ -1,0 +1,15 @@
+{
+  "name": "restaurant-management",
+  "version": "1.0.0",
+  "description": "Hệ thống quản lý nhà hàng - Node.js + Express + MySQL",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
+    "mysql2": "^3.11.0"
+  }
+}

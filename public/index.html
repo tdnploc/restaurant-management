@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Nhà Hàng</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-utensils"></i>
+                    <h1>Quản Lý Nhà Hàng</h1>
+                </div>
+                <div class="status">
+                    <span class="status-badge">Đang hoạt động</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <!-- Dashboard Stats -->
+            <section class="dashboard-stats">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
+                    <div class="stat-content">
+                        <h3>Tổng Doanh Thu</h3>
+                        <p class="stat-value" id="totalRevenue">0đ</p>
+                        <span class="stat-change">Đơn hoàn thành</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-shopping-cart"></i></div>
+                    <div class="stat-content">
+                        <h3>Đơn Hàng Chờ</h3>
+                        <p class="stat-value" id="pendingOrders">0</p>
+                        <span class="stat-change">Cần xử lý</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-content">
+                        <h3>Đơn Hoàn Thành</h3>
+                        <p class="stat-value" id="completedOrders">0</p>
+                        <span class="stat-change">Tổng cộng</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-utensils"></i></div>
+                    <div class="stat-content">
+                        <h3>Món Ăn</h3>
+                        <p class="stat-value" id="totalMenuItems">0</p>
+                        <span class="stat-change">Trong menu</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Navigation Tabs -->
+            <nav class="tabs">
+                <button class="tab-btn active" data-tab="menu">
+                    <i class="fas fa-utensils"></i> Quản Lý Menu
+                </button>
+                <button class="tab-btn" data-tab="orders">
+                    <i class="fas fa-shopping-cart"></i> Quản Lý Đơn Hàng
+                </button>
+                <button class="tab-btn" data-tab="statistics">
+                    <i class="fas fa-chart-bar"></i> Thống Kê Thu Nhập
+                </button>
+            </nav>
+
+            <!-- Menu Management Tab -->
+            <section id="menu-tab" class="tab-content active">
+                <div class="section-header">
+                    <div>
+                        <h2>Quản Lý Menu</h2>
+                        <p>Thêm, sửa, xóa các món ăn trong menu</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openAddMenuModal()">
+                        <i class="fas fa-plus"></i> Thêm Món Mới
+                    </button>
+                </div>
+
+                <!-- Search & Sort Bar -->
+                <div class="toolbar">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="menuSearch" placeholder="Tìm kiếm theo tên, mô tả, danh mục..." oninput="onSearchOrSort()">
+                        <button class="search-clear" id="searchClear" onclick="clearSearch()" style="display:none;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="sort-box">
+                        <label for="menuSort"><i class="fas fa-sort"></i> Sắp xếp:</label>
+                        <select id="menuSort" onchange="onSearchOrSort()">
+                            <option value="">Mặc định (Danh mục)</option>
+                            <option value="price_asc">Giá: Thấp → Cao</option>
+                            <option value="price_desc">Giá: Cao → Thấp</option>
+                            <option value="rating_desc">Sao: Cao → Thấp</option>
+                            <option value="rating_asc">Sao: Thấp → Cao</option>
+                            <option value="name_asc">Tên: A → Z</option>
+                            <option value="name_desc">Tên: Z → A</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="menuContainer" class="menu-container"></div>
+                <div id="menuEmpty" class="empty-state" style="display:none;">
+                    <i class="fas fa-search"></i>
+                    <p>Không tìm thấy món ăn nào</p>
+                </div>
+            </section>
+
+            <!-- Order Management Tab -->
+            <section id="orders-tab" class="tab-content">
+                <div class="section-header">
+                    <div>
+                        <h2>Quản Lý Đơn Hàng</h2>
+                        <p>Tạo và quản lý đơn hàng của khách hàng</p>
+                    </div>
+                    <button class="btn btn-success" onclick="openNewOrderModal()">
+                        <i class="fas fa-plus"></i> Tạo Đơn Hàng
+                    </button>
+                </div>
+                <div id="ordersContainer" class="orders-container"></div>
+            </section>
+
+            <!-- Statistics Tab -->
+            <section id="statistics-tab" class="tab-content">
+                <div class="section-header">
+                    <div>
+                        <h2>Thống Kê Thu Nhập</h2>
+                        <p>Xem báo cáo doanh thu theo ngày, tháng, năm</p>
+                    </div>
+                    <div class="stats-controls">
+                        <select id="statsType" onchange="updateStatistics()">
+                            <option value="daily">Theo ngày</option>
+                            <option value="monthly">Theo tháng</option>
+                            <option value="yearly">Theo năm</option>
+                        </select>
+                        <input type="date" id="statsDate" onchange="updateStatistics()">
+                        <button class="btn btn-primary" onclick="exportStatistics()">
+                            <i class="fas fa-download"></i> Xuất báo cáo
+                        </button>
+                    </div>
+                </div>
+
+                <div class="stats-summary">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+                        <div class="stat-content">
+                            <h3>Doanh Thu Kỳ Này</h3>
+                            <p class="stat-value" id="periodRevenue">0đ</p>
+                            <span class="stat-change" id="revenueChange">0%</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-shopping-bag"></i></div>
+                        <div class="stat-content">
+                            <h3>Số Đơn Hàng</h3>
+                            <p class="stat-value" id="periodOrders">0</p>
+                            <span class="stat-change" id="ordersChange">0%</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-calculator"></i></div>
+                        <div class="stat-content">
+                            <h3>Giá Trị TB/Đơn</h3>
+                            <p class="stat-value" id="avgOrderValue">0đ</p>
+                            <span class="stat-change" id="avgChange">0%</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-crown"></i></div>
+                        <div class="stat-content">
+                            <h3>Món Bán Chạy</h3>
+                            <p class="stat-value" id="topItem">-</p>
+                            <span class="stat-change" id="topItemCount">0 lần</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-content">
+                    <div class="stats-chart-container">
+                        <div class="chart-card">
+                            <h3>Biểu Đồ Doanh Thu</h3>
+                            <div id="revenueChart" class="chart"></div>
+                        </div>
+                    </div>
+                    <div class="stats-details">
+                        <div class="detail-card">
+                            <h3>Chi Tiết Theo Thời Gian</h3>
+                            <div id="timeDetails" class="time-details"></div>
+                        </div>
+                        <div class="detail-card">
+                            <h3>Top Món Ăn Bán Chạy</h3>
+                            <div id="topItems" class="top-items"></div>
+                        </div>
+                        <div class="detail-card">
+                            <h3>Phân Tích Theo Danh Mục</h3>
+                            <div id="categoryAnalysis" class="category-analysis"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Add/Edit Menu Item Modal -->
+    <div id="menuModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="menuModalTitle">Thêm Món Ăn Mới</h3>
+                <button class="close-btn" onclick="closeMenuModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="menuForm" class="modal-body">
+                <input type="hidden" id="menuItemId">
+                <div class="form-group">
+                    <label for="menuName">Tên món ăn *</label>
+                    <input type="text" id="menuName" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="menuPrice">Giá (VNĐ) *</label>
+                        <input type="number" id="menuPrice" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="menuRating">Đánh giá (0 - 5 sao)</label>
+                        <div class="rating-input-group">
+                            <input type="number" id="menuRating" min="0" max="5" step="0.1" value="0">
+                            <div class="rating-stars-preview" id="ratingPreview">
+                                <i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="menuCategory">Danh mục *</label>
+                    <select id="menuCategory" required>
+                        <option value="">Chọn danh mục</option>
+                        <option value="Món chính">Món chính</option>
+                        <option value="Khai vị">Khai vị</option>
+                        <option value="Tráng miệng">Tráng miệng</option>
+                        <option value="Đồ uống">Đồ uống</option>
+                        <option value="Salad">Salad</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="menuDescription">Mô tả</label>
+                    <textarea id="menuDescription" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="menuImage">URL Hình ảnh</label>
+                    <input type="url" id="menuImage">
+                </div>
+            </form>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeMenuModal()">Hủy</button>
+                <button type="submit" form="menuForm" class="btn btn-primary">Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Order Modal -->
+    <div id="orderModal" class="modal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>Tạo Đơn Hàng Mới</h3>
+                <button class="close-btn" onclick="closeOrderModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="order-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="customerName">Tên khách hàng</label>
+                            <input type="text" id="customerName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="tableNumber">Số bàn</label>
+                            <input type="number" id="tableNumber" required>
+                        </div>
+                    </div>
+
+                    <div class="order-items">
+                        <h4>Món đã chọn:</h4>
+                        <div id="selectedItems" class="selected-items"></div>
+                        <div class="total-section">
+                            <strong>Tổng cộng: <span id="orderTotal">0đ</span></strong>
+                        </div>
+                    </div>
+
+                    <div class="menu-selection">
+                        <h4>Chọn món ăn:</h4>
+                        <div id="menuSelection" class="menu-selection-grid"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeOrderModal()">Hủy</button>
+                <button type="button" class="btn btn-success" onclick="createOrder()">Tạo Đơn Hàng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Order Modal -->
+    <div id="viewOrderModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="viewOrderTitle">Chi Tiết Đơn Hàng</h3>
+                <button class="close-btn" onclick="closeViewOrderModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div id="orderDetails"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
